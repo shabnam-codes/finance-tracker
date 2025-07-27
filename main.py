@@ -1,7 +1,7 @@
 import pandas as pd
 import csv
 from datetime import datetime 
-from data_entry import get_amount, get_date, get_category, get_description
+from data_entry import get_amount, get_date, get_category, get_description, get_transactions
 import matplotlib.pyplot as plt
 
 class CSV:
@@ -76,7 +76,7 @@ def plot_transactions(df):
 
     income_df = df[df["category"] == "Income"].resample("D").sum().reindex(df.index)
     expense_df = df[df["category"] == "Expense"].resample("D").sum().reindex(df.index)
-    plt.figure(figsize=(15, 10))
+    plt.figure(figsize=(8, 5))
     plt.plot(income_df.index, income_df["amount"], label="Income", color="blue")
     plt.plot(expense_df.index, expense_df["amount"], label="Expense", color="red")
     plt.xlabel("Date")
@@ -85,6 +85,9 @@ def plot_transactions(df):
     plt.legend()
     plt.grid(True)
     plt.show()
+    plt.show()
+    input("Press Enter to continue...")
+
 
 def main():
     while True:
@@ -96,10 +99,11 @@ def main():
         if choice == "1":
             add()
         elif choice == "2":
+            CSV.initialize_csv()
             start_date = get_date("Enter the start date (dd-mm-yyyy): ")
             end_date = get_date("Enter the end date (dd-mm-yyyy): ")
-            df = CSV.get_transactions(start_date, end_date)
-            if input("Do you want to see a plot? (y/n) ").lower() == "y":
+            df = get_transactions(start_date, end_date)  # now from data_entry
+            if not df.empty and input("Do you want to see a plot? (y/n) ").lower() == "y":
                 plot_transactions(df)
         elif choice == "3":
             print("Exiting...")
@@ -107,5 +111,7 @@ def main():
         else:
             print("Invalid choice. Enter 1, 2 or 3.")
 
+
 if __name__ == "__main__":
     main()
+
