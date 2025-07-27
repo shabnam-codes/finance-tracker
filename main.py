@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 
 class CSV:
     CSV_FILE = "finance_data.csv"
-    COLOUMNS =["date","amount","category","description"]
+    COLUMNS = ["date", "amount", "category", "description"]
     FORMAT = "%d-%m-%Y"
 
     @classmethod
@@ -14,7 +14,7 @@ class CSV:
         try:
             pd.read_csv(cls.CSV_FILE)
         except FileNotFoundError:
-            df = pd.DataFrame(columns=["date","amount","category","description"])
+            df = pd.DataFrame(columns=["date", "amount", "category", "description"])
             df.to_csv(cls.CSV_FILE, index=False)
 
     @classmethod
@@ -26,10 +26,9 @@ class CSV:
             "description": description
         }
         with open(cls.CSV_FILE, "a", newline="") as csvfile:
-            writer = csv.DictWriter(csvfile, fieldnames = cls.COLOUMNS)
+            writer = csv.DictWriter(csvfile, fieldnames=cls.COLUMNS)
             writer.writerow(new_entry)
         print("Entry added successfully")
-
 
     @classmethod 
     def get_transactions(cls, start_date, end_date):
@@ -38,7 +37,7 @@ class CSV:
         start_date = datetime.strptime(start_date, CSV.FORMAT)
         end_date = datetime.strptime(end_date, CSV.FORMAT)
 
-        mask = (df["date"]>= start_date) & (df["date"] <= end_date)
+        mask = (df["date"] >= start_date) & (df["date"] <= end_date)
         filtered_df = df.loc[mask]
 
         if filtered_df.empty:
@@ -48,11 +47,11 @@ class CSV:
             print(
                 filtered_df.to_string(
                     index=False, formatters={"date": lambda x: x.strftime(CSV.FORMAT)} 
-            )
+                )
             )
 
-        total_income = filtered_df[filtered_df["category"] == "Income"] ["amount"].sum()
-        total_expense = filtered_df[filtered_df["category"] == "Income"] ["amount"].sum()
+        total_income = filtered_df[filtered_df["category"] == "Income"]["amount"].sum()
+        total_expense = filtered_df[filtered_df["category"] == "Expense"]["amount"].sum()
         print("\nSUMMARY:")
         print(f"Total Income: ${total_income:.2f}")
         print(f"Total Expense: ${total_expense:.2f}")
@@ -63,29 +62,28 @@ class CSV:
 def add():
     CSV.initialize_csv()
     date = get_date(
-        "Enter the date of the transaction(dd-mm-yyyy) or hit enter for todays date: \n",
-        allow_default = True
-        )
+        "Enter the date of the transaction(dd-mm-yyyy) or hit enter for today's date: \n",
+        allow_default=True
+    )
     amount = get_amount()
     category = get_category()    
     description = get_description()
 
     CSV.add_entry(date, amount, category, description)
 
-
 def plot_transactions(df):
-    df.set_index("date", inplace = True)
+    df.set_index("date", inplace=True)
 
-    income_df = df[df["cateory"] == "Income"].resample("D").sum().reindex(df.index, fill_value)
-    expense_df = df[df["cateory"] == "Expense"].resample("D").sum().reindex(df.index, fill_value)
-    plt.figure(figsize = (15,10))
-    plt.plot(income_df.index, income_df["amount"], label = "Imcome", color = "blue")
-    plt.plot(expense_df.index, expense_df["amount"], label = "Expense", color = "red")
+    income_df = df[df["category"] == "Income"].resample("D").sum().reindex(df.index)
+    expense_df = df[df["category"] == "Expense"].resample("D").sum().reindex(df.index)
+    plt.figure(figsize=(15, 10))
+    plt.plot(income_df.index, income_df["amount"], label="Income", color="blue")
+    plt.plot(expense_df.index, expense_df["amount"], label="Expense", color="red")
     plt.xlabel("Date")
     plt.ylabel("Amount")
     plt.title("Income and Expenses Over Time")
     plt.legend()
-    plt.grid = (True)
+    plt.grid(True)
     plt.show()
 
 def main():
